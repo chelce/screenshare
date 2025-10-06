@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useViewerSession } from "@/hooks/useViewerSession";
 import styles from "./viewer.module.css";
 
-export default function ViewerPage() {
+function ViewerContent() {
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -128,5 +128,13 @@ export default function ViewerPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ViewerPage() {
+  return (
+    <Suspense fallback={<div style={{ background: '#000', width: '100vw', height: '100vh' }} />}>
+      <ViewerContent />
+    </Suspense>
   );
 }
