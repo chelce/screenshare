@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BeamShare — Simple screen sharing",
+  title: "BeamShare — Simple Screen Sharing",
   description:
     "Create a six-digit room code and broadcast your screen to any device in the browser.",
 };
