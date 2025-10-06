@@ -1,6 +1,6 @@
 ## BeamShare
 
-BeamShare is a lightweight, browser-based screen sharing experience built with Next.js and WebRTC. Hosts receive a six-digit room code that viewers can enter from any device to watch the live stream—no extensions or installs required.
+BeamShare is a lightweight, browser-based screen sharing app built with Next.js and WebRTC. Hosts receive a six-digit room code that viewers can enter from any device to watch the live stream—no extensions or installs required.
 
 ### ✨ Features
 
