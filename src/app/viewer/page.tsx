@@ -13,9 +13,11 @@ function ViewerContent() {
 
   const { state, startViewing, stopViewing } = useViewerSession(videoRef);
   const { status, error } = state;
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
-    if (code && code.length === 6) {
+    if (code && code.length === 6 && !hasStartedRef.current) {
+      hasStartedRef.current = true;
       void startViewing(code);
     }
   }, [code, startViewing]);
