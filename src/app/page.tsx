@@ -2,10 +2,6 @@
 
 import { FormEvent, useMemo, useRef, useState } from "react";
 import { useHostSession, type HostSessionState } from "@/hooks/useHostSession";
-import {
-  useViewerSession,
-  type ViewerSessionState,
-} from "@/hooks/useViewerSession";
 import styles from "./page.module.css";
 
 type ViewMode = "landing" | "host" | "viewer";
@@ -152,49 +148,30 @@ function HostPanel({ onBack }: { onBack: () => void }) {
 }
 
 function ViewerPanel({ onBack }: { onBack: () => void }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const { state, startViewing, stopViewing, clearError } =
-    useViewerSession(videoRef);
-
   const [code, setCode] = useState("");
 
   const isCodeValid = useMemo(() => /^\d{6}$/.test(code), [code]);
-  const { status, error } = state;
-  const isConnecting = status === "connecting";
-  const isWatching = status === "watching";
-  const isActive =
-    status === "connecting" || status === "waiting" || status === "watching";
-
-  const statusLabel = useMemo(
-    () => viewerStatusCopy(status),
-    [status],
-  );
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    clearError();
     if (!isCodeValid) {
       return;
     }
-    void startViewing(code);
-  };
-
-  const handleBack = () => {
-    stopViewing();
-    onBack();
+    // Open viewer in a new window
+    const viewerUrl = `${window.location.origin}/viewer?code=${code}`;
+    window.open(viewerUrl, '_blank', 'width=1280,height=720,resizable=yes');
   };
 
   return (
     <section className={styles.panel}>
       <div className={styles.panelHeader}>
-        <button type="button" className={styles.backButton} onClick={handleBack}>
+        <button type="button" className={styles.backButton} onClick={onBack}>
           ← Back
         </button>
         <div>
           <h2>Join a room</h2>
           <p className={styles.helper}>
-            Ask the presenter for their six-digit code and drop it below to watch
-            live.
+            Enter the six-digit room code to open the viewer in a new window.
           </p>
         </div>
       </div>
@@ -211,9 +188,6 @@ function ViewerPanel({ onBack }: { onBack: () => void }) {
           onChange={(event) => {
             const sanitized = event.target.value.replace(/[^0-9]/g, "");
             setCode(sanitized);
-            if (error) {
-              clearError();
-            }
           }}
           className={styles.codeInput}
           aria-describedby="code-help"
@@ -226,34 +200,12 @@ function ViewerPanel({ onBack }: { onBack: () => void }) {
           <button
             type="submit"
             className={styles.primaryButton}
-            disabled={!isCodeValid || isConnecting}
+            disabled={!isCodeValid}
           >
-            {isConnecting ? "Connecting…" : "Start watching"}
+            Open viewer window
           </button>
-          {isActive && (
-            <button
-              type="button"
-              className={styles.secondaryButton}
-              onClick={stopViewing}
-            >
-              Leave room
-            </button>
-          )}
         </div>
       </form>
-
-      <div className={styles.videoFrame}>
-        <video ref={videoRef} className={styles.video} autoPlay playsInline />
-        {!isWatching && (
-          <span className={styles.videoPlaceholder}>
-            Your stream will appear here
-          </span>
-        )}
-      </div>
-
-      <p className={styles.status}>{statusLabel}</p>
-
-      {error && <p className={styles.error}>{error}</p>}
     </section>
   );
 }
@@ -280,23 +232,6 @@ function hostStatusCopy(
         : "Share the code so viewers can join.";
     case "live":
       return `Streaming to ${viewerCount} viewer${viewerCount === 1 ? "" : "s"}.`;
-    default:
-      return "";
-  }
-}
-
-function viewerStatusCopy(status: ViewerSessionState["status"]) {
-  switch (status) {
-    case "idle":
-      return "Enter the code to begin.";
-    case "connecting":
-      return "Calling the presenter…";
-    case "waiting":
-      return "Waiting for video…";
-    case "watching":
-      return "You're watching live.";
-    case "ended":
-      return "The presenter closed the room.";
     default:
       return "";
   }
